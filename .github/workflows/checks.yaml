@@ -19,6 +19,7 @@ jobs:
         id: tests
         run: |
           npm test | tee test_output
+          cat test_output
           test_suite_results=`awk '/Test Suites:/' test_output`
           test_results=`awk '/Tests:/' test_output`
           test_time=`awk '/Time:/' test_output`

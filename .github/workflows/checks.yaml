@@ -18,8 +18,7 @@ jobs:
       - name: Tests
         id: tests
         run: |
-          npm test | tee test_output
-          cat test_output
+          npm test 2>&1 | tee test_output
           test_suite_results=`awk '/Test Suites:/' test_output`
           test_results=`awk '/Tests:/' test_output`
           test_time=`awk '/Time:/' test_output`
@@ -27,11 +26,6 @@ jobs:
           echo "::set-output name=test-results::$test_results"
           echo "::set-output name=test-time::$test_time"
           if [[ $test_suite_results == *'failed'* ]]; then exit 1; fi
-
-      - name: Debugging
-        run: |
-          echo "${{ join(steps.tests.outputs, ',') }}"
-          echo "${{ steps.tests.outputs.test-results }}"
 
       - name: Notify Test Success
         uses: insprac/discord-notification-action@master

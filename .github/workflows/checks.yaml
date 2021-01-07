@@ -27,6 +27,11 @@ jobs:
           echo "::set-output name=test-time::$test_time"
           if [[ $test_suite_results == *'failed'* ]]; then exit 1; fi
 
+      - name: Debugging
+        run: |
+          echo "${{ join(steps.tests.outputs, ',') }}"
+          echo "${{ steps.tests.outputs.test-results }}"
+
       - name: Notify Test Success
         uses: insprac/discord-notification-action@master
         with:

@@ -19,7 +19,7 @@ jobs:
         id: tests
         run: |
           npm test | tee test_output
-          test_suite_results=`awk '/Tests Suites:/' test_output`
+          test_suite_results=`awk '/Test Suites:/' test_output`
           test_results=`awk '/Tests:/' test_output`
           test_time=`awk '/Time:/' test_output`
           echo "::set-output name=test-suite-results::$test_suite_results"
@@ -36,6 +36,7 @@ jobs:
           color: "#75c22d"
 
       - name: Notify Test Failure
+        if: ${{ failure() }}
         uses: insprac/discord-notification-action@master
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}

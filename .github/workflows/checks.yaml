@@ -8,37 +8,37 @@ jobs:
   checks:
     runs-on: ubuntu-latest
 
-  steps:
-    - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-    - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v1
 
-    - run: npm install
+      - run: npm install
 
-    - name: Tests
-      id: tests
-      run: |
-        npm test | tee test_output
-        test_suite_results=`awk '/Tests Suites:/' test_output`
-        test_results=`awk '/Tests:/' test_output`
-        test_time=`awk '/Time:/' test_output`
-        echo "::set-output name=test-suite-results::$test_suite_results"
-        echo "::set-output name=test-results::$test_results"
-        echo "::set-output name=test-time::$test_time"
-        if [[ $test_suite_results == *'failed'* ]]; then exit 1; fi
+      - name: Tests
+        id: tests
+        run: |
+          npm test | tee test_output
+          test_suite_results=`awk '/Tests Suites:/' test_output`
+          test_results=`awk '/Tests:/' test_output`
+          test_time=`awk '/Time:/' test_output`
+          echo "::set-output name=test-suite-results::$test_suite_results"
+          echo "::set-output name=test-results::$test_results"
+          echo "::set-output name=test-time::$test_time"
+          if [[ $test_suite_results == *'failed'* ]]; then exit 1; fi
 
-    - name: Notify Test Success
-      uses: insprac/discord-notification-action@master
-      with:
-        webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        title: Changeset.js - Test Success
-        message: "${{ github.event.head_commit.message }}\n```\n${{ steps.tests.outputs.test-suite-results }}\n${{ steps.tests.outputs.test-results }}\n${{ steps.tests.outputs.test-time }}\n```"
-        color: "#75c22d"
+      - name: Notify Test Success
+        uses: insprac/discord-notification-action@master
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          title: Changeset.js - Test Success
+          message: "${{ github.event.head_commit.message }}\n```\n${{ steps.tests.outputs.test-suite-results }}\n${{ steps.tests.outputs.test-results }}\n${{ steps.tests.outputs.test-time }}\n```"
+          color: "#75c22d"
 
-    - name: Notify Test Failure
-      uses: insprac/discord-notification-action@master
-      with:
-        webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        title: Changeset.js - Test Failure
-        message: "${{ github.event.head_commit.message }}\n```\n${{ steps.tests.outputs.test-suite-results }}\n${{ steps.tests.outputs.test-results }}\n${{ steps.tests.outputs.test-time }}\n```"
-        color: "#db3540"
+      - name: Notify Test Failure
+        uses: insprac/discord-notification-action@master
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          title: Changeset.js - Test Failure
+          message: "${{ github.event.head_commit.message }}\n```\n${{ steps.tests.outputs.test-suite-results }}\n${{ steps.tests.outputs.test-results }}\n${{ steps.tests.outputs.test-time }}\n```"
+          color: "#db3540"

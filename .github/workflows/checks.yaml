@@ -31,7 +31,7 @@ jobs:
         uses: insprac/discord-notification-action@master
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          title: Changeset.js - Test Success
+          title: @arco-tech/changeset.js - Test Success
           message: "${{ github.event.head_commit.message }}\n```\n${{ steps.tests.outputs.test-suite-results }}\n${{ steps.tests.outputs.test-results }}\n${{ steps.tests.outputs.test-time }}\n```"
           color: "#75c22d"
 
@@ -40,6 +40,6 @@ jobs:
         uses: insprac/discord-notification-action@master
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          title: Changeset.js - Test Failure
+          title: @arco-tech/changeset.js - Test Failure
           message: "${{ github.event.head_commit.message }}\n```\n${{ steps.tests.outputs.test-suite-results }}\n${{ steps.tests.outputs.test-results }}\n${{ steps.tests.outputs.test-time }}\n```"
           color: "#db3540"

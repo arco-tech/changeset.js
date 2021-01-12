@@ -19,12 +19,14 @@ export interface Options {
   changes?: Changes
   originals?: Originals
   errors?: AllFieldErrors
+  errorMessage?: string | null
 }
 
 export class Changeset {
   private originals: Originals = {}
   private changes: Changes = {}
   private errors: AllFieldErrors = {}
+  private errorMessage: string | null = null
 
   constructor(options: Options = {}) {
     if (options.originals) {
@@ -40,6 +42,11 @@ export class Changeset {
     if (options.errors) {
       verifyAllErrors(options.errors)
       this.errors = options.errors
+    }
+
+    if (options.errorMessage) {
+      verifyErrorMessage(options.errorMessage)
+      this.errorMessage = options.errorMessage
     }
   }
 
@@ -135,6 +142,10 @@ export class Changeset {
   }
 
   hasAnyErrors(): boolean {
+    if (this.errorMessage) {
+      return true
+    }
+
     for (const field in this.errors) {
       if (this.hasErrors(field)) {
         return true
@@ -150,6 +161,20 @@ export class Changeset {
 
   clearAllErrors(): void {
     this.errors = {}
+    this.errorMessage = null
+  }
+
+  hasErrorMessage(): boolean {
+    return this.errorMessage ? true : false
+  }
+
+  getErrorMessage(): string | null {
+    return this.errorMessage
+  }
+
+  setErrorMessage(errorMessage: string | null): void {
+    verifyErrorMessage(errorMessage)
+    this.errorMessage = errorMessage
   }
 }
 
@@ -210,5 +235,11 @@ function verifyError(error: FieldError): void {
     error.message !== undefined
   ) {
     throw new Error("Changeset error message must be a string")
+  }
+}
+
+function verifyErrorMessage(errorMessage: string | null): void {
+  if (typeof errorMessage !== "string" && errorMessage !== null) {
+    throw new Error("Changeset errorMessage must be a string or null")
   }
 }

@@ -17,9 +17,7 @@ describe("constructor", () => {
 
   test("throws error when originals is badly formatted", () => {
     function cs(originals: any) {
-      return () => {
-        new Changeset({ originals })
-      }
+      return () => new Changeset({ originals })
     }
 
     expect(cs("bad")).toThrow("must be an object")
@@ -30,9 +28,7 @@ describe("constructor", () => {
 
   test("throws error when changes is badly formatted", () => {
     function cs(changes: any) {
-      return () => {
-        new Changeset({ changes })
-      }
+      return () => new Changeset({ changes })
     }
 
     expect(cs("bad")).toThrow("must be an object")
@@ -43,9 +39,7 @@ describe("constructor", () => {
 
   test("throws error when errors is badly formatted", () => {
     function cs(errors: any) {
-      return () => {
-        new Changeset({ errors })
-      }
+      return () => new Changeset({ errors })
     }
 
     expect(cs("bad")).toThrow("must be an object")
@@ -58,6 +52,18 @@ describe("constructor", () => {
     expect(cs({ x: [{}] })).toThrow("must have a message property")
     expect(cs({ x: [{ message: true }] })).toThrow("message must be a string")
     expect(cs({ x: [{ message: 1 }] })).toThrow("message must be a string")
+  })
+
+  test("throws error when errorMessage isn't a string", () => {
+    function cs(errorMessage: any) {
+      return () => new Changeset({ errorMessage })
+    }
+
+    expect(cs(true)).toThrow("must be a string or null")
+    expect(cs(123)).toThrow("must be a string or null")
+    expect(cs({})).toThrow("must be a string or null")
+    expect(cs([])).toThrow("must be a string or null")
+    expect(cs(/x/)).toThrow("must be a string or null")
   })
 })
 
@@ -396,6 +402,12 @@ describe("hasAnyErrors()", () => {
     expect(changeset.hasAnyErrors()).toEqual(true)
   })
 
+  test("true when errorMessage is set", () => {
+    const changeset = new Changeset({ errorMessage: "abc" })
+
+    expect(changeset.hasAnyErrors()).toEqual(true)
+  })
+
   test("false when no errors are set", () => {
     const changeset = new Changeset({
       errors: {
@@ -421,15 +433,73 @@ describe("clearErrors()", () => {
 })
 
 describe("clearAllErrors()", () => {
-  test("clears all errors", () => {
+  test("clears all errors and errorMessage", () => {
     const changeset = new Changeset({
       errors: {
         test: [{ message: "Error" }],
         empty: [],
       },
+      errorMessage: "test",
     })
 
     changeset.clearAllErrors()
     expect(changeset.getAllErrors()).toStrictEqual({})
+    expect(changeset.getErrorMessage()).toStrictEqual(null)
+  })
+})
+
+describe("hasErrorMessage()", () => {
+  test("true when errorMessage is set", () => {
+    const changeset = new Changeset({ errorMessage: "abc" })
+
+    expect(changeset.hasErrorMessage()).toEqual(true)
+  })
+
+  test("false when errorMessage isn't set", () => {
+    const changeset = new Changeset()
+
+    expect(changeset.hasErrorMessage()).toEqual(false)
+  })
+})
+
+describe("getErrorMessage()", () => {
+  test("returns the error message", () => {
+    const changeset = new Changeset({ errorMessage: "abc" })
+
+    expect(changeset.getErrorMessage()).toEqual("abc")
+  })
+
+  test("defaults to null", () => {
+    const changeset = new Changeset()
+
+    expect(changeset.getErrorMessage()).toStrictEqual(null)
+  })
+})
+
+describe("setErrorMessage()", () => {
+  test("updates the error message", () => {
+    const changeset = new Changeset()
+    changeset.setErrorMessage("test")
+
+    expect(changeset.getErrorMessage()).toEqual("test")
+
+    changeset.setErrorMessage(null)
+
+    expect(changeset.getErrorMessage()).toEqual(null)
+  })
+
+  test("throws error when message isn't a string or null", () => {
+    function cs(errorMessage: any) {
+      return () => {
+        const changeset = new Changeset()
+        changeset.setErrorMessage(errorMessage)
+      }
+    }
+
+    expect(cs(true)).toThrow("must be a string or null")
+    expect(cs(123)).toThrow("must be a string or null")
+    expect(cs({})).toThrow("must be a string or null")
+    expect(cs([])).toThrow("must be a string or null")
+    expect(cs(/x/)).toThrow("must be a string or null")
   })
 })

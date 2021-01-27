@@ -118,7 +118,7 @@ export class Changeset {
     verifyChanges(changes)
     this.changes = changes
 
-    for (let field in changes) {
+    for (const field of Object.keys(changes)) {
       this.callListeners("change", field, changes[field], this)
     }
   }
@@ -211,6 +211,7 @@ export class Changeset {
       try {
         listener(...args)
       } catch (error) {
+        // tslint:disable-next-line
         console.error(`Failed to call Changeset listener ${listener}`)
       }
     })

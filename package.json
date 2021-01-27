@@ -1,6 +1,6 @@
 {
   "name": "@arco-tech/changeset",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Keep track of changes and validation errors",
   "main": "lib/changeset.js",
   "types": "lib/changeset.d.ts",

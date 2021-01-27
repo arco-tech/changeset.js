@@ -15,11 +15,23 @@ export interface AllFieldErrors {
   [field: string]: FieldError[] | null | undefined
 }
 
+export type ListenerType = "change"
+
+export interface Listeners {
+  change: ChangeListener[]
+}
+
+export type ChangeListener =
+  (field: string, value: any, changeset: Changeset) => void
+
+export type Listener = (...args: any[]) => any
+
 export interface Options {
   changes?: Changes
   originals?: Originals
   errors?: AllFieldErrors
   errorMessage?: string | null
+  onChange?: ChangeListener
 }
 
 export class Changeset {
@@ -27,6 +39,7 @@ export class Changeset {
   private changes: Changes = {}
   private errors: AllFieldErrors = {}
   private errorMessage: string | null = null
+  private listeners: Listeners = { change: [] }
 
   constructor(options: Options = {}) {
     if (options.originals) {
@@ -47,6 +60,11 @@ export class Changeset {
     if (options.errorMessage) {
       verifyErrorMessage(options.errorMessage)
       this.errorMessage = options.errorMessage
+    }
+
+    if (options.onChange) {
+      verifyListener(options.onChange)
+      this.listeners.change.push(options.onChange)
     }
   }
 
@@ -93,11 +111,16 @@ export class Changeset {
 
   setChange(field: string, value: any): void {
     this.changes[field] = value
+    this.callListeners("change", field, value, this)
   }
 
   setChanges(changes: Changes): void {
     verifyChanges(changes)
     this.changes = changes
+
+    for (let field in changes) {
+      this.callListeners("change", field, changes[field], this)
+    }
   }
 
   hasChange(field: string): boolean {
@@ -176,6 +199,22 @@ export class Changeset {
     verifyErrorMessage(errorMessage)
     this.errorMessage = errorMessage
   }
+
+  listen(listenerType: ListenerType, listener: Listener): void {
+    verifyListenerType(listenerType)
+    verifyListener(listener)
+    this.listeners.change.push(listener)
+  }
+
+  private callListeners(listenerType: ListenerType, ...args: any[]): void {
+    this.listeners[listenerType].forEach((listener: any) => {
+      try {
+        listener(...args)
+      } catch (error) {
+        console.error(`Failed to call Changeset listener ${listener}`)
+      }
+    })
+  }
 }
 
 function verifyOriginals(originals: Originals): void {
@@ -241,5 +280,21 @@ function verifyError(error: FieldError): void {
 function verifyErrorMessage(errorMessage: string | null): void {
   if (typeof errorMessage !== "string" && errorMessage !== null) {
     throw new Error("Changeset errorMessage must be a string or null")
+  }
+}
+
+function verifyListener(listener: Listener): void {
+  if (typeof listener !== "function") {
+    throw new Error("Changeset change listener must be a function")
+  }
+}
+
+function verifyListenerType(listenerType: ListenerType): void {
+  const types = ["change"]
+
+  if (types.indexOf(listenerType) === -1) {
+    throw new Error(
+      "Changeset listener type must be one of: " + types.join(", "),
+    )
   }
 }

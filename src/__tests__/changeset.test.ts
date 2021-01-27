@@ -6,6 +6,7 @@ describe("constructor", () => {
       originals: { test: "original" },
       changes: { test: "change" },
       errors: { test: [{ message: "Error" }] },
+      onChange: () => {},
     })
 
     expect(changeset.getOriginals()).toStrictEqual({ test: "original" })
@@ -218,6 +219,20 @@ describe("setChange()", () => {
       other: "new",
     })
   })
+
+  test("calls change listeners", () => {
+    const changeset = new Changeset()
+    let listener1Args = null
+    let listener2Args = null
+
+    changeset.listen("change", (...args: any[]) => { listener1Args = args })
+    changeset.listen("change", (...args: any[]) => { listener2Args = args })
+
+    changeset.setChange("test", 123)
+
+    expect(listener1Args).toStrictEqual(["test", 123, changeset])
+    expect(listener2Args).toStrictEqual(["test", 123, changeset])
+  })
 })
 
 describe("setChanges()", () => {
@@ -231,6 +246,20 @@ describe("setChanges()", () => {
 
     changeset.setChanges({ test: "updated" })
     expect(changeset.getChanges()).toStrictEqual({ test: "updated" })
+  })
+
+  test("calls change listeners for each value", () => {
+    const changeset = new Changeset()
+    const listenerArgs: any[][] = []
+
+    changeset.listen("change", (...args: any[]) => { listenerArgs.push(args) })
+
+    changeset.setChanges({ test: 123, test2: true })
+
+    expect(listenerArgs).toStrictEqual([
+      ["test", 123, changeset],
+      ["test2", true, changeset],
+    ])
   })
 
   test("throws an error when changes is an invalid type", () => {
@@ -501,5 +530,48 @@ describe("setErrorMessage()", () => {
     expect(cs({})).toThrow("must be a string or null")
     expect(cs([])).toThrow("must be a string or null")
     expect(cs(/x/)).toThrow("must be a string or null")
+  })
+})
+
+describe("listen()", () => {
+  test("adds a valid listener", () => {
+    const changeset = new Changeset()
+    let calledArgs = null
+
+    changeset.listen("change", (...args: any[]) => { calledArgs = args })
+    changeset.setChange("test", 123)
+
+    expect(calledArgs).toStrictEqual(["test", 123, changeset])
+  })
+
+  test("throws error when type is invalid", () => {
+    const changeset = new Changeset()
+
+    function cs(listenerType: any) {
+      return () => {
+        changeset.listen(listenerType, () => {})
+      }
+    }
+
+    expect(cs("none")).toThrow("must be one of: change")
+    expect(cs("invalid")).toThrow("must be one of: change")
+    expect(cs(123)).toThrow("must be one of: change")
+    expect(cs(true)).toThrow("must be one of: change")
+  })
+
+  test("throws error when callback isn't a function", () => {
+    const changeset = new Changeset()
+
+    function cs(callback: any) {
+      return () => {
+        changeset.listen("change", callback)
+      }
+    }
+
+    expect(cs("invalid")).toThrow("must be a function")
+    expect(cs(123)).toThrow("must be a function")
+    expect(cs({})).toThrow("must be a function")
+    expect(cs([])).toThrow("must be a function")
+    expect(cs(false)).toThrow("must be a function")
   })
 })

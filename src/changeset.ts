@@ -35,11 +35,11 @@ export interface Options {
 }
 
 export class Changeset {
-  private originals: Originals = {}
-  private changes: Changes = {}
-  private errors: AllFieldErrors = {}
-  private errorMessage: string | null = null
-  private listeners: Listeners = { change: [] }
+  originals: Originals = {}
+  changes: Changes = {}
+  errors: AllFieldErrors = {}
+  errorMessage: string | null = null
+  listeners: Listeners = { change: [] }
 
   constructor(options: Options = {}) {
     if (options.originals) {
@@ -202,7 +202,7 @@ export class Changeset {
     this.listeners.change.push(listener)
   }
 
-  private callListeners(listenerType: ListenerType, ...args: any[]): void {
+  callListeners(listenerType: ListenerType, ...args: any[]): void {
     this.listeners[listenerType].forEach((listener: any) => {
       try {
         listener(...args)

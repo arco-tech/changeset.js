@@ -165,10 +165,6 @@ export class Changeset {
   }
 
   hasAnyErrors(): boolean {
-    if (this.errorMessage) {
-      return true
-    }
-
     for (const field in this.errors) {
       if (this.hasErrors(field)) {
         return true

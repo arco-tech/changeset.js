@@ -431,10 +431,10 @@ describe("hasAnyErrors()", () => {
     expect(changeset.hasAnyErrors()).toEqual(true)
   })
 
-  test("true when errorMessage is set", () => {
+  test("false when only errorMessage is set", () => {
     const changeset = new Changeset({ errorMessage: "abc" })
 
-    expect(changeset.hasAnyErrors()).toEqual(true)
+    expect(changeset.hasAnyErrors()).toEqual(false)
   })
 
   test("false when no errors are set", () => {
